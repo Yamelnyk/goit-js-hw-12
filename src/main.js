@@ -29,6 +29,7 @@ async function onFormSubmit(e) {
   query = refs.formEl.elements.searchImages.value.trim();
   refs.gallery.innerHTML = '';
   currentPage = 1;
+
   if (!query.length) {
     iziToast.error({
       color: 'yellow',
@@ -36,10 +37,11 @@ async function onFormSubmit(e) {
       position: 'topRight',
     });
   }
+
   try {
     const data = await getImage(query, currentPage);
-
     maxPage = Math.ceil(data.total / pageSize);
+
     if (!data.hits.length) {
       iziToast.error({
         color: 'red',
@@ -49,9 +51,7 @@ async function onFormSubmit(e) {
     }
 
     const markup = imgTemplate(data.hits);
-
     refs.gallery.insertAdjacentHTML('beforeend', markup);
-
     showLoadMore();
 
     let simplGallery = new SimpleLightbox('.gallery a');
@@ -74,6 +74,10 @@ async function onLoadMoreClick() {
 
   refs.gallery.insertAdjacentHTML('beforeend', markup);
 
+  const rect = refs.gallery.firstElementChild.getBoundingClientRect().height;
+  window.scrollBy({
+    top: rect * 2,
+  });
   hideLoader();
   checkBtnStatus();
 }
@@ -81,6 +85,10 @@ async function onLoadMoreClick() {
 function checkBtnStatus() {
   if (currentPage >= maxPage) {
     hideLoadMore();
+    iziToast.show({
+      message: "We're sorry, but you've reached the end of search results.",
+      position: 'topRight',
+    });
   } else {
     showLoadMore();
   }
@@ -89,6 +97,7 @@ function checkBtnStatus() {
 function showLoadMore() {
   refs.btnLoadMore.classList.remove('hidden');
 }
+
 function hideLoadMore() {
   refs.btnLoadMore.classList.add('hidden');
 }
